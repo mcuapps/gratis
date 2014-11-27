@@ -33,7 +33,7 @@
 
 class FLASH_Class {
 private:
-	int CS;
+	uint8_t CS;
 
 	void spi_setup(void);
 	void spi_teardown(void);
@@ -47,20 +47,29 @@ public:
 	void write_enable(void);
 	void write_disable(void);
 	void write(uint32_t address, const void *buffer, uint16_t length);
+
+	// Arduino has separate memory spaces, but MSP430, ARM do not
+#if !defined(__AVR__)
+	// just alias the function name
+	inline void write_from_progmem(uint32_t address, const void *buffer, uint16_t length) {
+		this->write(address, buffer, length);
+	}
+#else
+	void write_from_progmem(uint32_t address, PROGMEM const void *buffer, uint16_t length);
+#endif
+
 	void sector_erase(uint32_t address);
 
 	// inline static void attachInterrupt();
 	// inline static void detachInterrupt();
 
-	void begin(int chip_select_pin);
-	void end();
+	void begin(uint8_t chip_select_pin);
+	void end(void);
 
-	FLASH_Class(int chip_select_pin);
+	FLASH_Class(uint8_t chip_select_pin);
 
 };
 
 extern FLASH_Class FLASH;
 
 #endif
-
-
